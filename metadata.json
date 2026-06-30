@@ -1,0 +1,6 @@
+{
+  "name": "StakePad",
+  "description": "StakePad — The accountability exchange. Your community bets on your word.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
