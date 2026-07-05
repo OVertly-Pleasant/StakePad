@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="description" content="StakePad — The accountability exchange. Your community bets on your word."/>
+<title>StakePad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --ink:#1A1209;
+  --ink2:#3D2E1A;
+  --ink3:#7A6A55;
+  --fog:#B8A898;
+  --rule:#E2D8CC;
+  --paper:#F5F0E8;
+  --cream:#FAF7F2;
+  --card:#FFFFFF;
+  --accent:#D64000;
+  --accent2:#F5E6DE;
+  --yes:#2D6A2D;
+  --yes-bg:#EAF2EA;
+  --no:#8B1A1A;
+  --no-bg:#F5EAEA;
+  --live:#C47A00;
+  --live-bg:#FDF4E3;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+button{font-family:var(--sans);cursor:pointer}
+input,textarea,select{font-family:var(--sans)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:var(--paper)}
+::-webkit-scrollbar-thumb{background:var(--rule)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* MASTHEAD */
+.masthead{border-bottom:2px solid var(--ink);padding:0 24px}
+.masthead-top{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px;border-bottom:1px solid var(--rule)}
+.masthead-logo{font-family:var(--serif);font-size:2rem;font-weight:900;letter-spacing:-.03em;color:var(--ink);line-height:1}
+.masthead-logo em{color:var(--accent);font-style:italic}
+.masthead-tagline{font-size:.6875rem;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.masthead-right{display:flex;align-items:center;gap:12px}
+.handle-wrap{display:flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--rule);border-radius:2px;padding:4px 10px}
+.handle-at{font-family:var(--mono);font-size:.8rem;color:var(--fog)}
+.handle-input{font-family:var(--mono);font-size:.8rem;color:var(--ink);background:none;border:none;outline:none;width:110px}
+.handle-input::placeholder{color:var(--fog)}
+.btn-new{background:var(--ink);color:var(--cream);border:none;padding:7px 14px;font-size:.8125rem;font-weight:500;border-radius:2px;transition:background .12s}
+.btn-new:hover{background:var(--accent)}
+.masthead-nav{display:flex;align-items:center;gap:0;padding:8px 0 0}
+.nav-btn{background:none;border:none;border-bottom:2px solid transparent;padding:6px 14px 8px;font-size:.8125rem;font-weight:500;color:var(--ink3);transition:color .12s,border-color .12s;white-space:nowrap}
+.nav-btn:hover{color:var(--ink)}
+.nav-btn.active{color:var(--ink);border-bottom-color:var(--accent)}
+.masthead-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:.6875rem;color:var(--ink3)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--fog);flex-shrink:0}
+.live-dot.live{background:#2D6A2D;animation:blink 2s infinite}
+.live-dot.warn{background:var(--live)}
+.live-dot.error{background:var(--accent)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+@media(max-width:640px){.masthead-logo{font-size:1.5rem}.masthead-right{gap:8px}.handle-wrap{display:none}.nav-btn{padding:6px 10px 8px;font-size:.75rem}}
+
+/* TICKER TAPE */
+.ticker-tape{background:var(--ink);color:var(--cream);height:30px;display:flex;align-items:center;overflow:hidden;position:relative}
+.ticker-tape::after{content:'';position:absolute;right:0;top:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,var(--ink));pointer-events:none;z-index:1}
+.ticker-inner{display:flex;gap:32px;padding:0 20px;overflow-x:auto;scrollbar-width:none;white-space:nowrap}
+.ticker-inner::-webkit-scrollbar{display:none}
+.ticker-item{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.ticker-label{font-size:.625rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5)}
+.ticker-val{font-family:var(--mono);font-size:.75rem;color:var(--cream);font-weight:500}
+.ticker-val.up{color:#7BCF7B}
+.ticker-val.dn{color:#F07070}
+.ticker-sep{color:rgba(255,255,255,.2);margin:0 8px}
+
+/* LAYOUT */
+.layout{max-width:1200px;margin:0 auto;padding:0 24px}
+.page{display:none;padding:32px 0 80px}
+.page.active{display:block}
+@media(max-width:640px){.page{padding:20px 0 60px}}
+
+/* ALERT STRIP */
+.alert-strip{display:none;padding:10px 24px;font-size:.8125rem;border-bottom:1px solid var(--rule)}
+.alert-strip.show{display:block}
+.alert-strip.warn{background:var(--live-bg);color:#7A5000}
+.alert-strip.error{background:var(--no-bg);color:var(--no)}
+
+/* FEATURED HERO — the signature element */
+.hero{display:grid;grid-template-columns:1fr 200px;gap:40px;padding:40px 0 32px;border-bottom:1px solid var(--rule);cursor:pointer;transition:opacity .1s}
+.hero:hover{opacity:.92}
+@media(max-width:700px){.hero{grid-template-columns:1fr;gap:20px;padding:24px 0}}
+.hero-eyebrow{display:flex;align-items:center;gap:8px;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:14px}
+.hero-title{font-family:var(--serif);font-size:2.5rem;font-weight:700;line-height:1.18;color:var(--ink);margin-bottom:10px}
+@media(max-width:700px){.hero-title{font-size:1.75rem}}
+.hero-desc{font-size:.9375rem;color:var(--ink3);line-height:1.6;max-width:520px;margin-bottom:16px}
+.hero-byline{display:flex;align-items:center;gap:10px;font-size:.8125rem;color:var(--ink3)}
+.hero-byline strong{color:var(--ink)}
+.hero-meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+.hero-meta-item{font-size:.75rem;color:var(--ink3);font-family:var(--mono)}
+/* the BIG number side */
+.hero-odds{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;border-left:1px solid var(--rule);padding-left:40px}
+@media(max-width:700px){.hero-odds{border-left:none;padding-left:0;border-top:1px solid var(--rule);padding-top:20px;flex-direction:row;gap:32px;justify-content:flex-start}}
+.hero-num{font-family:var(--serif);font-size:4.5rem;font-weight:900;line-height:1;letter-spacing:-.04em}
+.hero-num.yes{color:var(--yes)}
+.hero-num.no{color:var(--no)}
+.hero-num-label{font-size:.625rem;font-weight:500;text-transform:uppercase;letter-spacing:.14em;color:var(--fog);margin-top:3px}
+.hero-rule{border:none;border-top:1px solid var(--rule);width:100%;margin:14px 0}
+@media(max-width:700px){.hero-rule{display:none}}
+.hero-bar{height:3px;background:var(--rule);border-radius:0;overflow:hidden;margin-top:10px}
+.hero-bar-fill{height:100%;background:var(--yes);transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+/* CATEGORY ROW */
+.cat-row{display:flex;gap:6px;padding:20px 0 16px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--rule);margin-bottom:28px}
+.cat-row::-webkit-scrollbar{display:none}
+.cat-btn{background:none;border:1px solid var(--rule);border-radius:20px;padding:5px 14px;font-size:.75rem;font-weight:500;color:var(--ink3);white-space:nowrap;transition:all .12s;flex-shrink:0}
+.cat-btn:hover{border-color:var(--ink3);color:var(--ink)}
+.cat-btn.active{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.status-row{display:flex;gap:6px;align-items:center}
+.status-btn{background:none;border:none;padding:4px 0;font-size:.75rem;font-weight:500;color:var(--fog);border-bottom:1px solid transparent;transition:all .12s}
+.status-btn:hover{color:var(--ink3)}
+.status-btn.active{color:var(--ink);border-bottom-color:var(--ink)}
+.cat-divider{width:1px;height:16px;background:var(--rule);margin:0 4px;flex-shrink:0}
+.market-count{font-size:.6875rem;color:var(--fog);margin-left:4px;white-space:nowrap}
+
+/* MARKET GRID */
+.market-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--rule);border-left:1px solid var(--rule)}
+@media(max-width:900px){.market-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:580px){.market-grid{grid-template-columns:1fr}}
+
+/* MARKET CARD — newspaper grid style */
+.mcard{background:var(--card);border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:20px;cursor:pointer;transition:background .1s;display:flex;flex-direction:column;gap:11px;position:relative}
+.mcard:hover{background:var(--cream)}
+.mcard-tags{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.mcard-title{font-family:var(--serif);font-size:1.05rem;font-weight:700;line-height:1.35;color:var(--ink);flex:1}
+.mcard-byline{font-size:.75rem;color:var(--ink3);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.creator-link{background:none;border:none;padding:0;cursor:pointer;transition:color .1s}
+.creator-link:hover .creator-name-chip{background:var(--accent2);border-color:var(--accent);color:var(--accent)}
+.creator-name-chip{display:inline-flex;align-items:center;background:var(--cream);border:1px solid var(--rule);border-radius:2px;padding:2px 8px;font-size:.8125rem;font-weight:500;color:var(--ink2);transition:all .12s;font-family:var(--sans)}
+
+/* inline odds */
+.odds-row{display:flex;align-items:center;gap:0}
+.odds-big{font-family:var(--serif);font-size:1.6rem;font-weight:900;line-height:1}
+.odds-big.yes{color:var(--yes)}
+.odds-big.no{color:var(--no)}
+.odds-sep{width:1px;background:var(--rule);height:28px;margin:0 12px;flex-shrink:0}
+.odds-bar-wrap{flex:1}
+.odds-bar-track{height:3px;background:var(--rule);overflow:hidden}
+.odds-bar-fill{height:100%;background:var(--yes);transition:width .5s cubic-bezier(.4,0,.2,1)}
+.odds-lab{display:flex;justify-content:space-between;font-size:.55rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--fog);margin-top:4px}
+
+/* sparkline */
+.spark-wrap{flex-shrink:0}
+
+/* verdict */
+.verdict-strip{border-radius:2px;padding:7px 10px;font-size:.8rem;line-height:1.45;display:flex;gap:7px}
+.verdict-strip.s{background:var(--yes-bg);color:var(--yes)}
+.verdict-strip.f{background:var(--no-bg);color:var(--no)}
+.verdict-strip.e{background:var(--live-bg);color:#7A5000}
+.verdict-icon{font-weight:700;flex-shrink:0}
+
+.mcard-foot{display:flex;justify-content:space-between;border-top:1px solid var(--rule);padding-top:9px;font-size:.6875rem;color:var(--fog);align-items:center;margin-top:auto}
+.mcard-pts{font-family:var(--mono);font-size:.75rem;color:var(--ink3)}
+.time-pill{font-family:var(--mono);font-size:.6875rem}
+.time-pill.urg{color:var(--accent);animation:blink 2s infinite}
+.time-pill.norm{color:var(--live)}
+
+/* TAGS */
+.tag{display:inline-flex;align-items:center;border-radius:2px;padding:2px 7px;font-size:.625rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;line-height:1.5}
+.tc-fitness{background:#E8F4E8;color:#1A5C1A}
+.tc-career{background:#EAEBF8;color:#2A2A8C}
+.tc-learning{background:#E6F1FB;color:#0C447C}
+.tc-finance{background:#FAF4E3;color:#5C3D00}
+.tc-creative{background:var(--accent2);color:var(--accent)}
+.tc-social{background:#FAE8F2;color:#801050}
+.tc-health{background:#E4F4F8;color:#0C5868}
+.tc-other{background:var(--cream);color:var(--ink3)}
+.td-easy{background:#E8F4E8;color:#1A5C1A}
+.td-medium{background:#FAF4E3;color:#5C3D00}
+.td-hard{background:var(--accent2);color:var(--accent)}
+.td-extreme{background:#EEE6F8;color:#5C1A8C}
+.ts-live{background:var(--live-bg);color:var(--live)}
+.ts-success{background:var(--yes-bg);color:var(--yes)}
+.ts-failed{background:var(--no-bg);color:var(--no)}
+.ts-expired{background:var(--cream);color:var(--ink3)}
+
+/* REP */
+.rep{display:inline-flex;align-items:center;gap:4px;font-size:.6875rem;border-radius:2px;padding:1px 6px}
+.rep.g{background:var(--yes-bg);color:var(--yes)}
+.rep.m{background:var(--live-bg);color:#7A5000}
+.rep.b{background:var(--no-bg);color:var(--no)}
+.rep.n{color:var(--fog)}
+.rep-dot{width:4px;height:4px;border-radius:50%}
+
+/* EMPTY */
+.empty{text-align:center;padding:64px 0;grid-column:1/-1}
+.empty-title{font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--ink2);margin-bottom:8px}
+.empty-desc{font-size:.875rem;color:var(--ink3);margin-bottom:20px;line-height:1.6}
+.empty-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+
+/* FEED */
+.feed-wrap{max-width:660px}
+.feed-head{font-size:.6875rem;color:var(--ink3);display:flex;align-items:center;gap:7px;margin-bottom:20px;text-transform:uppercase;letter-spacing:.1em}
+.fi{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.fi-dot{width:8px;height:8px;border-radius:50%;background:var(--rule);flex-shrink:0;margin-top:5px}
+.fi-body{flex:1}
+.fi-event{font-size:.9rem;color:var(--ink2);line-height:1.45}
+.fi-meta{font-size:.6875rem;color:var(--fog);margin-top:4px}
+.fi-time{font-family:var(--mono);font-size:.6875rem}
+
+/* LEADERBOARD */
+.lb-wrap{max-width:720px}
+.lb-head{display:grid;grid-template-columns:36px 1fr 64px 64px 80px;gap:4px;padding:0 12px 10px;border-bottom:1px solid var(--rule);font-size:.625rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--fog)}
+@media(max-width:540px){.lb-head{grid-template-columns:36px 1fr 80px}.lb-hm{display:none!important}}
+.lb-row{display:grid;grid-template-columns:36px 1fr 64px 64px 80px;gap:4px;padding:12px;border-bottom:1px solid var(--rule);align-items:center;transition:background .1s}
+.lb-row:hover{background:var(--cream)}
+.lb-row.g1{background:rgba(196,122,0,.04)}
+@media(max-width:540px){.lb-row{grid-template-columns:36px 1fr 80px}.lb-rm{display:none!important}}
+.lb-rank{font-family:var(--mono);font-size:.75rem;color:var(--fog)}
+.lb-name{font-size:.9rem;font-weight:500}
+.lb-num{font-family:var(--mono);font-size:.8rem;text-align:right}
+.lb-num.c{text-align:center}
+.lb-pts{font-family:var(--serif);font-size:1.1rem;font-weight:700;text-align:right}
+.lb-pts.up{color:var(--yes)}
+.lb-pts.dn{color:var(--no)}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(26,18,9,0);z-index:500;align-items:center;justify-content:center;padding:16px;transition:background .25s ease}
+.overlay.open{display:flex}
+.overlay.visible{background:rgba(26,18,9,.62)}
+.modal{background:var(--card);width:100%;max-width:580px;max-height:90vh;overflow-y:hidden;display:flex;flex-direction:column;border-top:3px solid var(--accent);opacity:0;transform:scale(.96) translateY(10px);transition:opacity .22s ease,transform .22s cubic-bezier(.34,1.26,.64,1)}
+.overlay.visible .modal{opacity:1;transform:scale(1) translateY(0)}
+@media(max-width:640px){.modal{max-height:95vh;border-radius:0;transform:translateY(24px) scale(1)}.overlay{align-items:flex-end;padding:0}.overlay.visible .modal{transform:translateY(0) scale(1)}}
+.mh{padding:22px 24px 16px;border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--card);z-index:10}
+.mh-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.mh-title{font-family:var(--serif);font-size:1.25rem;font-weight:700;line-height:1.3;color:var(--ink)}
+.mh-desc{font-size:.875rem;color:var(--ink3);margin-top:5px;line-height:1.5}
+.mh-creator{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.mh-close{background:none;border:none;color:var(--fog);font-size:1.2rem;line-height:1;flex-shrink:0;margin-left:auto;align-self:flex-start;transition:color .1s}
+.mh-close:hover{color:var(--ink)}
+.mh-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+/* stats strip */
+.ms{display:flex;gap:0;border-bottom:1px solid var(--rule)}
+.ms-box{flex:1;padding:12px 16px;border-right:1px solid var(--rule)}
+.ms-box:last-child{border-right:none}
+.ms-label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--fog);margin-bottom:4px}
+.ms-val{font-family:var(--serif);font-size:1.5rem;font-weight:900;line-height:1}
+.ms-val.yes{color:var(--yes)}
+.ms-val.no{color:var(--no)}
+/* odds strip in modal */
+.modal-odds{padding:14px 24px;border-bottom:1px solid var(--rule)}
+/* verdict */
+.modal-verdict{padding:14px 24px;border-bottom:1px solid var(--rule)}
+.mv-box{padding:12px;border-left:3px solid var(--yes)}
+.mv-box.fail{border-left-color:var(--no)}
+.mv-title{font-family:var(--serif);font-size:.9rem;font-weight:700;margin-bottom:4px}
+.mv-text{font-size:.8125rem;color:var(--ink3);line-height:1.55}
+/* user bar */
+.modal-user{display:flex;align-items:center;gap:10px;padding:10px 24px;background:var(--cream);border-bottom:1px solid var(--rule)}
+.modal-user label{font-size:.75rem;color:var(--ink3);white-space:nowrap}
+.modal-user .inp{flex:1;background:var(--card);border:1px solid var(--rule);border-radius:2px;padding:5px 9px;font-size:.8125rem;color:var(--ink);transition:border-color .12s}
+.modal-user .inp:focus{border-color:var(--accent);outline:none}
+.modal-uid{font-size:.625rem;color:var(--fog);white-space:nowrap;font-family:var(--mono)}
+/* tabs */
+.modal-tabs{display:flex;border-bottom:1px solid var(--rule);padding:0 24px;overflow-x:auto;scrollbar-width:none}
+.modal-tabs::-webkit-scrollbar{display:none}
+.mtab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 12px;font-size:.8125rem;color:var(--ink3);white-space:nowrap;transition:all .12s}
+.mtab:hover{color:var(--ink)}
+.mtab.active{color:var(--ink);border-bottom-color:var(--accent)}
+/* content */
+.mc{padding:20px 24px;flex:1;overflow-y: auto;}
+/* footer */
+.mf{padding:10px 24px;border-top:1px solid var(--rule);display:flex;gap:6px;flex-wrap:wrap}
+.mf-tag{font-size:.6875rem;color:var(--fog)}
+
+/* FORMS */
+.fstack{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.flabel{font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3)}
+.fhint{font-size:.6875rem;color:var(--fog)}
+.flabel-row{display:flex;justify-content:space-between;align-items:center}
+.inp,.inp-ta,.sel{background:var(--cream);border:1px solid var(--rule);border-radius:2px;padding:9px 12px;font-size:.875rem;color:var(--ink);width:100%;transition:border-color .12s}
+.inp:focus,.inp-ta:focus,.sel:focus{border-color:var(--accent);outline:none;background:var(--card)}
+.inp::placeholder,.inp-ta::placeholder{color:var(--fog)}
+.inp-ta{resize:vertical;line-height:1.5}
+.inp-range{width:100%;height:2px;background:var(--rule);border-radius:0;-webkit-appearance:none;outline:none}
+.inp-range::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:460px){.fgrid2{grid-template-columns:1fr}}
+.cid-chip{background:var(--cream);border:1px solid var(--rule);padding:8px 12px;font-size:.8125rem;color:var(--ink3);display:none}
+.cid-chip code{font-family:var(--mono);color:var(--accent);font-size:.8rem}
+
+/* ALERT */
+.alrt{border-radius:2px;padding:10px 14px;font-size:.8125rem;line-height:1.5}
+.alrt-info{background:#E8F1FA;color:#0C447C;border-left:3px solid #0C447C}
+.alrt-ok{background:var(--yes-bg);color:var(--yes);border-left:3px solid var(--yes)}
+.alrt-warn{background:var(--live-bg);color:#7A5000;border-left:3px solid var(--live)}
+.alrt-err{background:var(--no-bg);color:var(--no);border-left:3px solid var(--no)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:2px;padding:9px 18px;font-size:.875rem;font-weight:500;cursor:pointer;transition:opacity .12s}
+.btn:hover{opacity:.82}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-ink{background:var(--ink);color:var(--cream)}
+.btn-acc{background:var(--accent);color:#fff}
+.btn-yes{background:var(--yes);color:#fff}
+.btn-no{background:var(--no);color:#fff}
+.btn-out{background:none;border:1px solid var(--rule);color:var(--ink)}
+.btn-out:hover{border-color:var(--ink);opacity:1}
+.btn-ghost{background:none;border:1px solid var(--rule);color:var(--ink3)}
+.btn-ghost:hover{opacity:1;color:var(--ink);border-color:var(--ink3)}
+.btn-sm{padding:5px 12px;font-size:.8125rem}
+.btn-full{width:100%}
+.btn-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* POSITION BUTTONS */
+.pos-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pos-btn{border:1px solid var(--rule);border-radius:2px;background:none;padding:14px;cursor:pointer;text-align:center;transition:all .12s}
+.pos-btn:hover{border-color:var(--ink3)}
+.pos-btn.sy{border-color:var(--yes);background:var(--yes-bg)}
+.pos-btn.sn{border-color:var(--no);background:var(--no-bg)}
+.pos-dir{font-family:var(--serif);font-size:1.25rem;font-weight:900}
+.pos-dir.y{color:var(--yes)}
+.pos-dir.n{color:var(--no)}
+.pos-odds{font-family:var(--mono);font-size:.6875rem;color:var(--ink3);margin-top:3px}
+
+/* RETURN BOX */
+.ret-box{background:var(--cream);border:1px solid var(--rule);padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ret-label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--fog);margin-bottom:3px}
+.ret-val{font-family:var(--serif);font-size:1.4rem;font-weight:900}
+.ret-val.up{color:var(--yes)}
+.ret-val.dn{color:var(--no)}
+
+/* ORDERBOOK */
+.ob-h{display:grid;grid-template-columns:1fr 60px 80px;font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--fog);padding:0 8px 8px;border-bottom:1px solid var(--rule)}
+.ob-r{display:grid;grid-template-columns:1fr 60px 80px;align-items:center;padding:7px 8px;border-bottom:1px solid var(--cream);font-size:.8125rem}
+.ob-r:nth-child(odd){background:var(--cream)}
+.ob-name{color:var(--ink2)}
+.ob-side{text-align:center;font-size:.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.ob-side.y{color:var(--yes)}.ob-side.n{color:var(--no)}
+.ob-pts{text-align:right;font-family:var(--mono);font-size:.8rem}
+
+/* SETTLE */
+.st-h{display:grid;grid-template-columns:1fr 60px 72px 80px;font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--fog);padding:0 8px 8px;border-bottom:1px solid var(--rule)}
+.st-r{display:grid;grid-template-columns:1fr 60px 72px 80px;align-items:center;padding:7px 8px;border-bottom:1px solid var(--cream);font-size:.8125rem}
+.st-r:nth-child(odd){background:var(--cream)}
+.st-pnl{text-align:right;font-family:var(--mono);font-weight:600}
+.st-pnl.pos{color:var(--yes)}.st-pnl.neg{color:var(--no)}
+
+/* CHART */
+.chart-area{position:relative}
+.chart-tip{position:absolute;top:0;background:var(--card);border:1px solid var(--rule);padding:4px 9px;font-size:.75rem;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .1s;font-family:var(--mono);color:var(--ink)}
+.chart-tip.v{opacity:1}
+
+/* COMMUNITY VOTE */
+.cv-tally{background:var(--cream);border:1px solid var(--rule);padding:12px;margin-bottom:12px}
+.cv-tally-label{font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:8px}
+.cv-voter{display:flex;justify-content:space-between;font-size:.8125rem;padding:4px 0;border-bottom:1px dashed var(--rule)}
+.cv-voter-vote.s{color:var(--yes);font-weight:600}
+.cv-voter-vote.f{color:var(--no);font-weight:600}
+
+/* IMAGE PROOF */
+.img-prev{margin-top:8px;border:1px solid var(--rule);max-height:120px;overflow:hidden;display:none}
+.img-prev img{width:100%;max-height:120px;object-fit:cover}
+
+/* HISTORY POPUP */
+.hp-overlay{display:none;position:fixed;inset:0;background:rgba(26,18,9,0);z-index:800;align-items:center;justify-content:center;padding:16px;transition:background .2s ease}
+.hp-overlay.open{display:flex}
+.hp-overlay.visible{background:rgba(26,18,9,.62)}
+.hp{background:var(--card);width:100%;max-width:420px;max-height:82vh;overflow-y:auto;border-top:3px solid var(--ink);padding:24px;opacity:0;transform:scale(.96) translateY(8px);transition:opacity .2s ease,transform .2s cubic-bezier(.34,1.2,.64,1)}
+.hp-overlay.visible .hp{opacity:1;transform:scale(1) translateY(0)}
+.hp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.hp-name{font-family:var(--serif);font-size:1.2rem;font-weight:700}
+.hp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.hp-stat{background:var(--cream);padding:12px;text-align:center}
+.hp-stat-val{font-family:var(--serif);font-size:1.6rem;font-weight:900}
+.hp-stat-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--fog);margin-top:2px}
+.hp-tl{display:flex;flex-direction:column;gap:4px}
+.hp-entry{display:flex;align-items:center;gap:8px;background:var(--cream);padding:8px 10px;font-size:.8125rem}
+.hp-entry-icon.s{color:var(--yes);font-weight:700;flex-shrink:0}
+.hp-entry-icon.f{color:var(--no);font-weight:700;flex-shrink:0}
+.hp-entry-title{flex:1;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* SKELETON */
+.skel{background:linear-gradient(90deg,var(--cream) 25%,var(--paper) 50%,var(--cream) 75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:2px}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* FADE-UP */
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fu .2s ease forwards}
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-top">
+    <div>
+      <div class="masthead-logo">Stake<em>Pad</em></div>
+      <div class="masthead-tagline">The Accountability Exchange</div>
+    </div>
+    <div class="masthead-right">
+      <div class="masthead-status" id="statusLine">
+        <span class="live-dot" id="statusDot"></span>
+        <span id="statusTxt">Connecting</span>
+      </div>
+      <div class="handle-wrap">
+        <span class="handle-at">@</span>
+        <input class="handle-input" id="globalHandle" placeholder="yourhandle" autocomplete="nickname" aria-label="Your handle"/>
+      </div>
+      <button class="btn-new" id="btnNew">+ New stake</button>
+    </div>
+  </div>
+  <nav class="masthead-nav">
+    <button class="nav-btn active" data-page="market">Market</button>
+    <button class="nav-btn" data-page="feed">Feed</button>
+    <button class="nav-btn" data-page="leaderboard">Leaderboard</button>
+    <div class="masthead-status" id="statusLineMob" style="margin-left:auto;display:none">
+      <span class="live-dot" id="statusDotMob"></span>
+    </div>
+    <button class="btn-ghost btn-sm" id="btnDemo" style="margin-left:8px">Load demo</button>
+  </nav>
+</header>
+
+<!-- TICKER TAPE -->
+<div class="ticker-tape" aria-label="Platform stats">
+  <div class="ticker-inner">
+    <div class="ticker-item"><span class="ticker-label">Markets</span><span class="ticker-val" id="tMkts">—</span></div>
+    <span class="ticker-sep">·</span>
+    <div class="ticker-item"><span class="ticker-label">Live</span><span class="ticker-val up" id="tLive">—</span></div>
+    <span class="ticker-sep">·</span>
+    <div class="ticker-item"><span class="ticker-label">Resolved</span><span class="ticker-val" id="tRes">—</span></div>
+    <span class="ticker-sep">·</span>
+    <div class="ticker-item"><span class="ticker-label">Success rate</span><span class="ticker-val" id="tRate">—</span></div>
+    <span class="ticker-sep">·</span>
+    <div class="ticker-item"><span class="ticker-label">Pts staked</span><span class="ticker-val" id="tPts">—</span></div>
+    <span class="ticker-sep">·</span>
+    <div class="ticker-item"><span class="ticker-label">Positions</span><span class="ticker-val" id="tPos">—</span></div>
+  </div>
+</div>
+
+<!-- ALERTS -->
+<div class="alert-strip warn" id="warnBanner">Gemini unavailable — running in fallback mode. Guardian keyword blocklist still active. Add <code>GEMINI_API_KEY</code> to <code>backend/.env</code>.</div>
+<div class="alert-strip error" id="errBanner">Backend offline. Start it: <code>cd backend &amp;&amp; uvicorn main:app --reload</code></div>
+
+<!-- MAIN -->
+<main>
+  <div class="layout">
+
+    <!-- MARKET PAGE -->
+    <section class="page active" id="page-market">
+      <article class="hero" id="hero" style="display:none" role="button" tabindex="0" aria-label="Featured market">
+        <div>
+          <div class="hero-eyebrow"><span class="live-dot live"></span>Featured market</div>
+          <h2 class="hero-title" id="hTitle">—</h2>
+          <p class="hero-desc" id="hDesc">—</p>
+          <div class="hero-byline" id="hByline"></div>
+          <div class="hero-meta" id="hMeta"></div>
+          <div class="hero-bar" style="max-width:320px;margin-top:16px"><div class="hero-bar-fill" id="hBar"></div></div>
+        </div>
+        <div class="hero-odds">
+          <div class="hero-num yes" id="hYes">—</div>
+          <div class="hero-num-label" style="text-align:right">YES</div>
+          <hr class="hero-rule"/>
+          <div class="hero-num no" id="hNo">—</div>
+          <div class="hero-num-label" style="text-align:right">NO</div>
+        </div>
+      </article>
+
+      <div class="cat-row">
+        <button class="cat-btn active" data-cat="all">All</button>
+        <button class="cat-btn" data-cat="fitness">Fitness</button>
+        <button class="cat-btn" data-cat="career">Career</button>
+        <button class="cat-btn" data-cat="learning">Learning</button>
+        <button class="cat-btn" data-cat="finance">Finance</button>
+        <button class="cat-btn" data-cat="creative">Creative</button>
+        <button class="cat-btn" data-cat="social">Social</button>
+        <button class="cat-btn" data-cat="health">Health</button>
+        <div class="cat-divider"></div>
+        <div class="status-row">
+          <button class="status-btn active" data-st="all">All</button>
+          <button class="status-btn" data-st="open">Live</button>
+          <button class="status-btn" data-st="expired">Expired</button>
+          <button class="status-btn" data-st="resolved">Resolved</button>
+        </div>
+        <span class="market-count" id="mktCount"></span>
+      </div>
+
+      <div class="market-grid" id="mktGrid"></div>
+    </section>
+
+    <!-- FEED PAGE -->
+    <section class="page" id="page-feed">
+      <div class="feed-wrap">
+        <div class="feed-head"><span class="live-dot live"></span>Live activity — refreshes every 30 s</div>
+        <div id="feedList"></div>
+      </div>
+    </section>
+
+    <!-- LEADERBOARD PAGE -->
+    <section class="page" id="page-leaderboard">
+      <div class="lb-wrap">
+        <p style="font-size:.8125rem;color:var(--ink3);margin-bottom:16px">Ranked by virtual points. Click any creator name to view their history.</p>
+        <div class="lb-head">
+          <span>#</span><span>Name</span>
+          <span class="lb-hm" style="text-align:center">Stakes</span>
+          <span class="lb-hm" style="text-align:center">Win%</span>
+          <span style="text-align:right">Points</span>
+        </div>
+        <div id="lbList"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- STAKE MODAL -->
+<div class="overlay" id="stakeOverlay">
+  <article class="modal">
+    <header class="mh">
+      <div class="mh-row">
+        <div style="flex:1">
+          <div class="mh-tags" id="mhTags"></div>
+          <h2 class="mh-title" id="mhTitle">—</h2>
+          <p class="mh-desc" id="mhDesc">—</p>
+          <div class="mh-creator" id="mhCreator"></div>
+        </div>
+        <button class="mh-close" id="mhClose" aria-label="Close">✕</button>
+      </div>
+    </header>
+    <div class="ms">
+      <div class="ms-box"><div class="ms-label">Pool YES</div><div class="ms-val yes" id="msYes">—</div></div>
+      <div class="ms-box"><div class="ms-label">Total</div><div class="ms-val" id="msTotal">—</div></div>
+      <div class="ms-box"><div class="ms-label">Pool NO</div><div class="ms-val no" id="msNo">—</div></div>
+    </div>
+    <div class="modal-odds" id="mOdds"></div>
+    <div class="modal-verdict" id="mVerdict" style="display:none"></div>
+    <div id="mCvSum" style="display:none;padding:10px 24px;border-bottom:1px solid var(--rule);font-size:.8125rem;color:var(--ink3)"></div>
+    <div class="modal-user">
+      <label for="mHandle">@</label>
+      <input type="text" id="mHandle" class="inp" placeholder="yourhandle" autocomplete="nickname" aria-label="Your handle"/>
+      <div class="modal-uid" id="mUid"></div>
+    </div>
+    <div class="modal-tabs" id="mTabs" role="tablist"></div>
+    <div class="mc" id="mContent"></div>
+    <footer class="mf" id="mFoot"></footer>
+  </article>
+</div>
+
+<!-- CREATE MODAL -->
+<div class="overlay" id="createOverlay">
+  <article class="modal">
+    <header class="mh">
+      <div class="mh-row">
+        <h2 class="mh-title">List a new stake</h2>
+        <button class="mh-close" id="crClose" aria-label="Close">✕</button>
+      </div>
+    </header>
+    <div class="mc">
+      <div class="fstack">
+        <div class="alrt alrt-info">Stakes pass through the <strong>Guardian AI</strong> before going live. Harmful or illegal goals are rejected automatically.</div>
+        <div class="field">
+          <label class="flabel" for="crHandle">Your handle</label>
+          <input type="text" id="crHandle" class="inp" placeholder="yourhandle" autocomplete="nickname"/>
+        </div>
+        <div class="cid-chip" id="cidChip">Creator ID: <code id="cidDisplay">—</code><span style="color:var(--accent);margin-left:8px;font-size:.75rem">— save this to submit proof later</span></div>
+        <div class="field">
+          <label class="flabel" for="crTitle">Stake title — what are you committing to?</label>
+          <input type="text" id="crTitle" class="inp" placeholder="e.g. Ship my side project in 72 hours"/>
+        </div>
+        <div class="field">
+          <label class="flabel" for="crDesc">Description — rules, how you'll prove it, what counts</label>
+          <textarea id="crDesc" class="inp-ta" rows="3" placeholder="Be specific. Vague goals get lower odds."></textarea>
+        </div>
+        <div class="fgrid2">
+          <div class="field">
+            <div class="flabel-row"><label class="flabel" for="crHours">Deadline</label><span class="fhint" id="crHrVal">48h from now</span></div>
+            <input type="range" id="crHours" class="inp-range" min="6" max="720" step="6" value="48"/>
+          </div>
+          <div class="field">
+            <div class="flabel-row"><label class="flabel" for="crAmt">Self-stake</label><span class="fhint" id="crAmtVal">200 pts</span></div>
+            <input type="range" id="crAmt" class="inp-range" min="50" max="1000" step="50" value="200"/>
+          </div>
+        </div>
+        <div class="field">
+          <label class="flabel" for="crMethod">Verification method</label>
+          <select id="crMethod" class="sel">
+            <option value="photo">📷  Photo / screenshot</option>
+            <option value="github">⌥  GitHub commit</option>
+            <option value="calendar">📅  Google Calendar event</option>
+            <option value="community">👥  Community vote</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="flabel" for="crHint">Verification hint (optional)</label>
+          <input type="text" id="crHint" class="inp" placeholder="github.com/you/repo · calendar event name"/>
+        </div>
+        <div id="crMsg"></div>
+        <button class="btn btn-ink btn-full" id="crSubmit">List on exchange →</button>
+      </div>
+    </div>
+  </article>
+</div>
+
+<!-- HISTORY POPUP -->
+<div class="hp-overlay" id="hpOverlay">
+  <div class="hp">
+    <div class="hp-head">
+      <h2 class="hp-name" id="hpName">—</h2>
+      <button class="mh-close" id="hpClose">✕</button>
+    </div>
+    <div class="hp-stats" id="hpStats"></div>
+    <div id="hpChart" style="margin-bottom:16px"></div>
+    <div class="hp-tl" id="hpTl"></div>
+  </div>
+</div>
+
+<script>
+const API = window.STAKEPAD_API || 'http://localhost:8000';
+const qs = s => document.querySelector(s);
+const qsa = s => document.querySelectorAll(s);
+const fmt = n => n == null ? '—' : Number(n).toLocaleString();
+const cid = h => h ? `user-${h.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')}` : '';
+
+// handle persistence
+const getH = () => sessionStorage.getItem('sp_h') || '';
+const setH = h => { sessionStorage.setItem('sp_h', h); };
+
+qs('#globalHandle').value = getH();
+qs('#mHandle').value = getH();
+qs('#crHandle').value = getH();
+
+function syncHandles(src) {
+  setH(src.value.trim());
+  [qs('#globalHandle'),qs('#mHandle'),qs('#crHandle')].forEach(el => { if(el && el !== src) el.value = src.value; });
+  updateMUid(); updateCidChip();
+}
+[qs('#globalHandle'),qs('#mHandle'),qs('#crHandle')].forEach(el => el?.addEventListener('input', e => syncHandles(e.target)));
+
+function updateMUid() {
+  const el = qs('#mUid'); if(!el) return;
+  const h = qs('#mHandle')?.value.trim();
+  el.textContent = h ? `user-${h.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')}` : '';
+}
+function updateCidChip() {
+  const h = qs('#crHandle')?.value.trim();
+  const chip = qs('#cidChip'); if(!chip) return;
+  if(h){ chip.style.display='block'; qs('#cidDisplay').textContent = cid(h); }
+  else chip.style.display='none';
+}
+
+function isExpired(s){ return s.deadline_passed || new Date(s.deadline) <= Date.now(); }
+function tl(deadline){
+  const d = new Date(deadline)-Date.now();
+  if(d<=0) return {text:'Expired',urg:false,exp:true};
+  const h=Math.floor(d/36e5),m=Math.floor((d%36e5)/6e4);
+  if(h>48) return {text:`${Math.floor(h/24)}d`,urg:false,exp:false};
+  if(h>0) return {text:`${h}h ${m}m`,urg:h<6,exp:false};
+  return {text:`${m}m`,urg:true,exp:false};
+}
+
+const CAT_DOT = {fitness:'#2D6A2D',career:'#2A2A8C',learning:'#185FA5',
+  finance:'#8A6000',creative:'#D64000',social:'#801050',health:'#0C5868',other:'#7A6A55'};
+const CATCLS = {fitness:'tc-fitness',career:'tc-career',learning:'tc-learning',
+  finance:'tc-finance',creative:'tc-creative',social:'tc-social',health:'tc-health',other:'tc-other'};
+const DIFFCLS = {easy:'td-easy',medium:'td-medium',hard:'td-hard',extreme:'td-extreme'};
+
+function stTag(s){
+  const exp=isExpired(s);
+  if(s.status==='resolved') return s.verdict==='success'
+    ? '<span class="tag ts-success">✓ Success</span>'
+    : '<span class="tag ts-failed">✗ Failed</span>';
+  if(exp) return '<span class="tag ts-expired">Expired</span>';
+  return '<span class="tag ts-live"><span style="width:5px;height:5px;border-radius:50%;background:var(--live);display:inline-block;animation:blink 2s infinite;margin-right:4px"></span>Live</span>';
+}
+
+function repBadge(h){
+  if(!h||h.rate==null) return '<span class="rep n">New</span>';
+  const p=Math.round(h.rate*100),c=p>=65?'g':p>=45?'m':'b';
+  const dc=p>=65?'var(--yes)':p>=45?'var(--live)':'var(--no)';
+  return `<span class="rep ${c}"><span class="rep-dot" style="background:${dc}"></span>${p}% · ${h.total}</span>`;
+}
+
+function spark(snaps,w=56,h=22){
+  if(!snaps||snaps.length<2) return '';
+  const d=snaps.map(s=>s.yes_pct);
+  const mn=Math.min(...d),mx=Math.max(...d),r=mx-mn||1;
+  const pts=d.map((v,i)=>`${(i/(d.length-1))*w},${h-((v-mn)/r)*(h-3)-1.5}`).join(' ');
+  const last=pts.split(' ').pop().split(',');
+  const tc=d[d.length-1]>=d[0]?'var(--yes)':'var(--no)';
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${tc}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${last[0]}" cy="${last[1]}" r="2.5" fill="${tc}"/></svg>`;
+}
+
+function oddsRowHTML(yp,np){
+  return `<div class="odds-row">
+    <div><div class="odds-big yes">${yp}%</div><div style="font-size:.55rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--fog);margin-top:3px">YES</div></div>
+    <div class="odds-sep"></div>
+    <div class="odds-bar-wrap" style="flex:1">
+      <div class="odds-bar-track"><div class="odds-bar-fill" style="width:${yp}%"></div></div>
+      <div class="odds-lab"><span>YES ${yp}%</span><span>NO ${np}%</span></div>
+    </div>
+    <div class="odds-sep"></div>
+    <div style="text-align:right"><div class="odds-big no">${np}%</div><div style="font-size:.55rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--fog);margin-top:3px;text-align:right">NO</div></div>
+  </div>`;
+}
+
+// STATE
+let _stakes=[],_stats=null,_lb=[],_feed=[],_cur=null;
+let _catF='all',_stF='all',_selPos='yes',_imgB64=null,_imgMime='image/jpeg';
+
+// API
+async function apiFetch(path,opts={}){
+  const r=await fetch(`${API}${path}`,{headers:{'Content-Type':'application/json'},...opts});
+  if(!r.ok){const e=await r.json().catch(()=>({detail:r.statusText}));throw e;}
+  return r.json();
+}
+
+// STATUS
+function setStatus(ok,gemini){
+  const dots=[qs('#statusDot'),qs('#statusDotMob')];
+  const txt=qs('#statusTxt');
+  const cls=gemini?'live':ok?'warn':'error';
+  dots.forEach(d=>{if(d){d.className='live-dot '+cls;}});
+  if(txt) txt.textContent=gemini?'Gemini live':ok?'Fallback mode':'Offline';
+  qs('#errBanner').classList.toggle('show',!ok);
+  qs('#warnBanner').classList.toggle('show',ok&&!gemini);
+}
+
+// TICKER
+function renderTicker(){
+  if(!_stats) return;
+  qs('#tMkts').textContent=_stats.total_stakes;
+  qs('#tLive').textContent=_stats.open_stakes;
+  qs('#tRes').textContent=_stats.resolved_stakes;
+  const r=_stats.success_rate;
+  const rEl=qs('#tRate'); rEl.textContent=`${r}%`; rEl.className=`ticker-val ${r>50?'up':'dn'}`;
+  qs('#tPts').textContent=fmt(_stats.total_coins_in_market);
+  qs('#tPos').textContent=_stats.total_bets;
+}
+
+// MARKET
+function applyFilters(){
+  const filtered=_stakes.filter(s=>{
+    if(_catF!=='all'&&s.category!==_catF) return false;
+    const exp=isExpired(s);
+    if(_stF==='open') return s.status==='open'&&!exp;
+    if(_stF==='expired') return s.status==='open'&&exp;
+    if(_stF==='resolved') return s.status==='resolved';
+    return true;
+  });
+
+  // hero
+  const feat=_stakes.filter(s=>s.status==='open'&&!isExpired(s))
+    .sort((a,b)=>((b.yes_votes||0)+(b.no_votes||0))-((a.yes_votes||0)+(a.no_votes||0)))[0];
+  const heroEl=qs('#hero');
+  if(feat&&_catF==='all'&&_stF==='all'){
+    heroEl.style.display='grid'; heroEl.dataset.id=feat.id;
+    const odds=feat.odds||{yes_pct:Math.round(feat.base_yes_probability*100),no_pct:Math.round((1-feat.base_yes_probability)*100)};
+    qs('#hTitle').textContent=feat.title;
+    qs('#hDesc').textContent=feat.description||'';
+    qs('#hByline').innerHTML=`<span class='creator-name-chip'>${feat.creator_name}</span>${repBadge(feat.creator_history)}`;
+    const tp=(feat.pool_yes||0)+(feat.pool_no||0);
+    const t=tl(feat.deadline);
+    qs('#hMeta').innerHTML=`<span class="hero-meta-item">${fmt(tp)} pts staked</span><span class="hero-meta-item">${(feat.yes_votes||0)+(feat.no_votes||0)} positions</span>${t.exp?'':'<span class="hero-meta-item">'+t.text+'</span>'}`;
+    qs('#hYes').textContent=`${odds.yes_pct}%`;
+    qs('#hNo').textContent=`${odds.no_pct}%`;
+    qs('#hBar').style.width=`${odds.yes_pct}%`;
+  } else heroEl.style.display='none';
+
+  qs('#mktCount').textContent=`${filtered.length} market${filtered.length!==1?'s':''}`;
+  const grid=qs('#mktGrid');
+  if(!filtered.length){
+    grid.innerHTML=`<div class="empty"><h3 class="empty-title">No markets here yet</h3><p class="empty-desc">Load the demo data to see sample markets, or create your first stake and invite your people.</p><div class="empty-actions"><button class="btn btn-out" id="emptyDemo">Load demo data</button><button class="btn btn-ink" id="emptyNew">+ New stake</button></div></div>`;
+    qs('#emptyDemo')?.addEventListener('click',loadSeed);
+    qs('#emptyNew')?.addEventListener('click',openCreate);
+    return;
+  }
+  grid.innerHTML=filtered.map(s=>{
+    const exp=isExpired(s);
+    const odds=s.odds||{yes_pct:Math.round(s.base_yes_probability*100),no_pct:Math.round((1-s.base_yes_probability)*100)};
+    const tp=(s.pool_yes||0)+(s.pool_no||0);
+    const t=tl(s.deadline);
+    let mid='';
+    if(s.status==='open'&&!exp){
+      const sk=spark(s.odds_snapshots);
+      mid=`<div style="display:flex;align-items:flex-end;gap:10px">${oddsRowHTML(odds.yes_pct,odds.no_pct)}${sk?`<div class="spark-wrap">${sk}</div>`:''}</div>`;
+    } else if(s.status==='resolved'){
+      const vc=s.verdict==='success'?'s':'f',vi=s.verdict==='success'?'✓':'✗';
+      mid=`<div class="verdict-strip ${vc}"><span class="verdict-icon">${vi}</span><span>${(s.verdict_reasoning||'').slice(0,75)}…</span></div>`;
+    } else {
+      mid=`<div class="verdict-strip e"><span class="verdict-icon">⏱</span><span>Deadline passed — awaiting creator proof</span></div>`;
+    }
+    const timeHtml=t.exp?'':`<span class="time-pill ${t.urg?'urg':'norm'}">${t.text}</span>`;
+    return `<article class="mcard fu" data-id="${s.id}" tabindex="0" role="button" aria-label="${s.title}">
+      <div class="mcard-tags"><span class="tag ${CATCLS[s.category]||'tc-other'}">${s.category||'other'}</span><span class="tag ${DIFFCLS[s.difficulty]||'td-medium'}">${s.difficulty}</span>${stTag(s)}</div>
+      <h3 class="mcard-title">${s.title}</h3>
+      <div class="mcard-byline"><button class="creator-link" data-cid="${s.creator_id}" data-cn="${s.creator_name}"><span class="creator-name-chip">${s.creator_name}</span></button>${repBadge(s.creator_history)}</div>
+      ${mid}
+      <footer class="mcard-foot"><span class="mcard-pts">${fmt(tp)} pts <span style="color:var(--fog);font-family:var(--sans)">${(s.yes_votes||0)+(s.no_votes||0)} positions</span></span>${timeHtml}</footer>
+    </article>`;
+  }).join('');
+
+  grid.querySelectorAll('.mcard').forEach(c=>{
+    const open=()=>{const s=_stakes.find(x=>x.id===c.dataset.id);if(s)openStakeModal(s);};
+    c.addEventListener('click',e=>{if(e.target.closest('.creator-link'))return;open();});
+    c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
+  });
+  grid.querySelectorAll('.creator-link').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openHist(b.dataset.cid,b.dataset.cn);}));
+}
+
+// FEED
+function renderFeed(){
+  const el=qs('#feedList');
+  if(!_feed.length){el.innerHTML='<div class="empty"><h3 class="empty-title">Nothing yet</h3><p class="empty-desc">Load demo data or create a stake to see the feed.</p></div>';return;}
+  el.innerHTML=_feed.map(e=>`
+    <div class="fi"><div class="fi-dot" style="background:${CAT_DOT[e.category]||'var(--fog)'}"></div>
+    <div class="fi-body"><p class="fi-event">${e.event}</p>
+    <p class="fi-meta">${e.stake_title} · ${e.creator_name} · <time class="fi-time" datetime="${e.ts}">${new Date(e.ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</time></p>
+    </div></div>`).join('');
+}
+
+// LEADERBOARD
+function renderLB(){
+  const el=qs('#lbList');
+  if(!_lb.length){el.innerHTML='<div class="empty"><h3 class="empty-title">No rankings yet</h3></div>';return;}
+  const medals=['🥇','🥈','🥉'];
+  el.innerHTML=_lb.map((u,i)=>`
+    <div class="lb-row ${i===0?'g1':''}" role="row">
+      <span class="lb-rank">${i<3?medals[i]:`#${u.rank}`}</span>
+      <span class="lb-name">${u.name}</span>
+      <span class="lb-num c lb-rm">${u.stakes_created}</span>
+      <span class="lb-num c lb-rm" style="color:${u.win_rate>50?'var(--yes)':'var(--no)'}">${u.win_rate}%</span>
+      <span class="lb-pts ${u.coins>1000?'up':'dn'}">${fmt(u.coins)}</span>
+    </div>`).join('');
+}
+
+// DATA LOAD
+async function loadAll(){
+  try{
+    const [h,s,st,lb,f]=await Promise.all([apiFetch('/health'),apiFetch('/stakes'),apiFetch('/stats'),apiFetch('/leaderboard'),apiFetch('/feed?limit=30')]);
+    setStatus(true,h.gemini); _stakes=s.stakes; _stats=st; _lb=lb.leaderboard; _feed=f.events;
+    renderTicker(); applyFilters(); renderFeed(); renderLB();
+  }catch{setStatus(false,false);}
+}
+async function checkH(){try{const h=await apiFetch('/health');setStatus(true,h.gemini);}catch{setStatus(false,false);}}
+async function loadSeed(){
+  const b=qs('#btnDemo'); b.disabled=true; b.textContent='Loading…';
+  try{await apiFetch('/admin/seed?secret=stakepad-demo',{method:'POST'});await loadAll();}catch(e){console.error(e);}
+  b.disabled=false; b.textContent='Load demo';
+}
+
+// NAV
+function setPage(p){
+  qsa('.nav-btn').forEach(b=>{b.classList.toggle('active',b.dataset.page===p);b.setAttribute('aria-current',b.dataset.page===p?'page':'false');});
+  qsa('.page').forEach(s=>s.classList.toggle('active',s.id===`page-${p}`));
+}
+qsa('.nav-btn').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.page)));
+qsa('.cat-btn').forEach(b=>b.addEventListener('click',()=>{_catF=b.dataset.cat;qsa('.cat-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');applyFilters();}));
+qsa('.status-btn').forEach(b=>b.addEventListener('click',()=>{_stF=b.dataset.st;qsa('.status-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');applyFilters();}));
+qs('#btnNew').addEventListener('click',openCreate);
+qs('#btnDemo').addEventListener('click',loadSeed);
+qs('#hero').addEventListener('click',()=>{const s=_stakes.find(x=>x.id===qs('#hero').dataset.id);if(s)openStakeModal(s);});
+qs('#hero').addEventListener('keydown',e=>{if(e.key==='Enter'){const s=_stakes.find(x=>x.id===qs('#hero').dataset.id);if(s)openStakeModal(s);}});
+
+// CHART
+function buildChart(snaps,container){
+  container.innerHTML='';
+  if(!snaps||snaps.length<2){container.innerHTML='<p style="font-size:.8125rem;color:var(--ink3);padding:8px 0">Chart appears as positions are placed.</p>';return;}
+  const d=snaps.map(s=>s.yes_pct),times=snaps.map(s=>new Date(s.ts));
+  const W=container.clientWidth||480,H=100,P=6;
+  const mn=Math.max(0,Math.min(...d)-5),mx=Math.min(100,Math.max(...d)+5),r=mx-mn||10;
+  const tx=i=>P+(i/(d.length-1))*(W-P*2-28);
+  const ty=v=>P+(H-P*2)-((v-mn)/r)*(H-P*2);
+  const pts=d.map((v,i)=>`${tx(i)},${ty(v)}`).join(' ');
+  const fill=[`${tx(0)},${H-P}`,...d.map((v,i)=>`${tx(i)},${ty(v)}`),`${tx(d.length-1)},${H-P}`].join(' ');
+  const yL=[mx,(mx+mn)/2,mn].map(v=>({v:Math.round(v),y:ty(v)}));
+  const tip=document.createElement('div'); tip.className='chart-tip'; 
+  const wrap=document.createElement('div'); wrap.className='chart-area'; wrap.style.position='relative';
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width','100%'); svg.setAttribute('height',H);
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.innerHTML=`${yL.map(l=>`<line x1="${P}" y1="${l.y}" x2="${W-30}" y2="${l.y}" stroke="var(--rule)" stroke-width="0.5" stroke-dasharray="3 3"/>`).join('')}<polygon points="${fill}" fill="var(--yes)" opacity="0.07"/><polyline points="${pts}" fill="none" stroke="var(--yes)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${tx(d.length-1)}" cy="${ty(d[d.length-1])}" r="3.5" fill="var(--yes)"/>${yL.map(l=>`<text x="${W-24}" y="${l.y+4}" font-size="8" fill="var(--ink3)" font-family="DM Mono,monospace">${l.v}%</text>`).join('')}<line id="hl" x1="0" y1="${P}" x2="0" y2="${H-P}" stroke="var(--rule)" stroke-width="1" opacity="0"/><circle id="hd" cx="0" cy="0" r="4" fill="var(--yes)" opacity="0"/>`;
+  svg.addEventListener('mousemove',e=>{
+    const rect=svg.getBoundingClientRect(),sc=W/rect.width;
+    const mx2=(e.clientX-rect.left)*sc-P;
+    const ci=Math.max(0,Math.min(d.length-1,Math.round((mx2/(W-P*2-28))*(d.length-1))));
+    svg.querySelector('#hl')?.setAttribute('x1',tx(ci));svg.querySelector('#hl')?.setAttribute('x2',tx(ci));svg.querySelector('#hl')?.setAttribute('opacity','1');
+    svg.querySelector('#hd')?.setAttribute('cx',tx(ci));svg.querySelector('#hd')?.setAttribute('cy',ty(d[ci]));svg.querySelector('#hd')?.setAttribute('opacity','1');
+    tip.textContent=`${d[ci]}% · ${times[ci].toLocaleDateString([],{month:'short',day:'numeric'})}`;
+    tip.style.left=`${(tx(ci)/W)*100}%`; tip.classList.add('v');
+  });
+  svg.addEventListener('mouseleave',()=>{tip.classList.remove('v');svg.querySelector('#hl')?.setAttribute('opacity','0');svg.querySelector('#hd')?.setAttribute('opacity','0');});
+  wrap.appendChild(svg); wrap.appendChild(tip); container.appendChild(wrap);
+}
+
+// STAKE MODAL
+function openStakeModal(s){
+  _cur=s;
+  const exp=isExpired(s),odds=s.odds||{yes_pct:Math.round(s.base_yes_probability*100),no_pct:Math.round((1-s.base_yes_probability)*100)};
+  const tp=(s.pool_yes||0)+(s.pool_no||0);
+  const isCom=s.verification_method==='community';
+
+  qs('#mhTags').innerHTML=`<span class="tag ${CATCLS[s.category]||'tc-other'}">${s.category}</span><span class="tag ${DIFFCLS[s.difficulty]||'td-medium'}">${s.difficulty}</span>${stTag(s)}<span class="tag tc-other" style="font-size:.575rem">${s.verification_method?.toUpperCase()}</span>${exp&&s.status==='open'?'<span class="tag ts-failed">Expired — locked</span>':''}`;
+  qs('#mhTitle').textContent=s.title;
+  qs('#mhDesc').textContent=s.description||'';
+  qs('#mhCreator').innerHTML=`<button class="creator-link" data-cid="${s.creator_id}" data-cn="${s.creator_name}"><span class="creator-name-chip">${s.creator_name}</span></button>${repBadge(s.creator_history)}`;
+  qs('#mhCreator').querySelector('.creator-link')?.addEventListener('click',()=>openHist(s.creator_id,s.creator_name));
+  qs('#msYes').textContent=fmt(s.pool_yes);
+  qs('#msTotal').textContent=fmt(tp);
+  qs('#msNo').textContent=fmt(s.pool_no);
+
+  const mOdds=qs('#mOdds');
+  if(s.status==='open'&&!exp){mOdds.style.display='block';mOdds.innerHTML=oddsRowHTML(odds.yes_pct,odds.no_pct);}
+  else mOdds.style.display='none';
+
+  const mv=qs('#mVerdict');
+  if(s.status==='resolved'){
+    mv.style.display='block';
+    const fc=s.verdict==='success'?'':'fail',fi=s.verdict==='success'?'✓':'✗';
+    mv.innerHTML=`<div class="mv-box ${fc}"><div class="mv-title">${fi} Oracle verdict: ${s.verdict?.toUpperCase()} <span style="font-weight:400;font-size:.75rem;color:var(--fog)">${Math.round((s.verdict_confidence||0)*100)}% confidence · ${s.evidence_quality||''} evidence</span></div><p class="mv-text">${s.verdict_reasoning||''}</p></div>`;
+  } else mv.style.display='none';
+
+  const cvs=qs('#mCvSum'),cvV=s.community_votes||[],cvSuc=cvV.filter(v=>v.vote==='success').length;
+  if(isCom&&s.status==='open'&&cvV.length){cvs.style.display='block';cvs.innerHTML=`Community vote: <strong style="color:var(--yes)">${cvSuc} success</strong> · <strong style="color:var(--no)">${cvV.length-cvSuc} failure</strong> · ${cvV.length} votes · need 5`;}
+  else cvs.style.display='none';
+
+  const mh=qs('#mHandle'); mh.value=getH(); updateMUid();
+
+  const tabs=[
+    {id:'market',l:'Orderbook'},{id:'chart',l:'Price chart'},{id:'feed',l:'Activity'},
+    ...(s.status==='open'&&!exp?[{id:'trade',l:'Take position'}]:[]),
+    ...(s.status==='open'?[{id:'resolve',l:isCom?'Community vote':'Submit proof'}]:[]),
+    ...(s.status==='resolved'?[{id:'payouts',l:'Settlement'}]:[]),
+  ];
+  qs('#mTabs').innerHTML=tabs.map((t,i)=>`<button class="mtab ${i===0?'active':''}" data-tab="${t.id}" role="tab" aria-selected="${i===0}">${t.l}</button>`).join('');
+  qsa('.mtab').forEach(b=>b.addEventListener('click',()=>{qsa('.mtab').forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false');});b.classList.add('active');b.setAttribute('aria-selected','true');renderMTab(b.dataset.tab);}));
+
+  const mf=qs('#mFoot');
+  if(s.tags?.length){mf.style.display='flex';mf.innerHTML=s.tags.map(t=>`<span class="mf-tag">#${t}</span>`).join('');}
+  else mf.style.display='none';
+
+  renderMTab('market');
+  const ov = qs('#stakeOverlay');
+  ov.classList.add('open');
+  requestAnimationFrame(() => requestAnimationFrame(() => ov.classList.add('visible')));
+  setTimeout(() => qs('#mHandle')?.focus(), 50);
+}
+
+function showMsg(id,type,txt){const el=qs(`#${id}`);if(el)el.innerHTML=`<div class="alrt alrt-${type}" role="alert">${txt}</div>`;}
+
+function renderMTab(tab){
+  const s=_cur; if(!s) return;
+  const c=qs('#mContent');
+  const exp=isExpired(s),isCom=s.verification_method==='community';
+  const odds=s.odds||{yes_pct:Math.round(s.base_yes_probability*100),no_pct:Math.round((1-s.base_yes_probability)*100)};
+  const pos=s.positions||s.bets||[],cvV=s.community_votes||[],cvSuc=cvV.filter(v=>v.vote==='success').length;
+
+  if(tab==='market'){
+    if(!pos.length){c.innerHTML='<div class="empty"><h3 class="empty-title">No positions yet</h3><p class="empty-desc">Take a position to be first on this stake.</p></div>';return;}
+    c.innerHTML=`<div class="ob-h"><span>Participant</span><span style="text-align:center">Side</span><span style="text-align:right">Pts</span></div>${pos.map(b=>`<div class="ob-r"><span class="ob-name">${b.bettor_name}</span><span class="ob-side ${b.position==='yes'?'y':'n'}">${b.position.toUpperCase()}</span><span class="ob-pts">${fmt(b.amount)}</span></div>`).join('')}`;
+  }
+  else if(tab==='chart'){
+    c.innerHTML='<p style="font-size:.75rem;color:var(--ink3);margin-bottom:12px">YES probability over time — hover to inspect</p><div id="chartCt"></div>';
+    setTimeout(()=>buildChart(s.odds_snapshots||[],qs('#chartCt')),0);
+  }
+  else if(tab==='feed'){
+    const f=s.activity_feed||[];
+    if(!f.length){c.innerHTML='<p style="color:var(--ink3);font-size:.875rem">No activity yet.</p>';return;}
+    c.innerHTML=f.slice().reverse().map(e=>`<div class="fi"><div class="fi-dot"></div><div class="fi-body"><p class="fi-event">${e.event}</p><time class="fi-meta fi-time" datetime="${e.ts}">${new Date(e.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</time></div></div>`).join('');
+  }
+  else if(tab==='trade'&&!exp&&s.status==='open'){
+    c.innerHTML=`<div class="fstack">${!getH()?'<div class="alrt alrt-warn">Set your handle in the bar above to take a position.</div>':''}<div class="field"><div class="flabel">Position</div><div class="pos-grid"><button class="pos-btn sy" data-pos="yes"><div class="pos-dir y">▲ YES</div><div class="pos-odds">${odds.yes_pct} pts / 100</div></button><button class="pos-btn" data-pos="no"><div class="pos-dir n">▼ NO</div><div class="pos-odds">${odds.no_pct} pts / 100</div></button></div></div><div class="field"><div class="flabel-row"><label class="flabel" for="trAmt">Amount</label><span class="fhint" id="trAmtV">100 pts</span></div><input type="range" id="trAmt" class="inp-range" min="10" max="500" step="10" value="100"/></div><div class="ret-box" id="retBox"><div><div class="ret-label">Potential return</div><div class="ret-val up" id="retRet">—</div></div><div><div class="ret-label">Max loss</div><div class="ret-val dn" id="retLoss">100 pts</div></div></div><div id="trMsg"></div><button class="btn btn-ink btn-full" id="trSubmit">Place 100 pts YES</button></div>`;
+    _selPos='yes';
+    qsa('.pos-btn').forEach(b=>b.addEventListener('click',()=>{_selPos=b.dataset.pos;qsa('.pos-btn').forEach(x=>x.classList.remove('sy','sn'));b.classList.add(_selPos==='yes'?'sy':'sn');updTrade();}));
+    function updTrade(){
+      const a=Number(qs('#trAmt')?.value||100),py=s.pool_yes||0,pn=s.pool_no||0;
+      qs('#trAmtV').textContent=`${a} pts`;
+      const ret=_selPos==='yes'?Math.round((a/(py+a))*(py+pn+a)):Math.round((a/(pn+a))*(py+pn+a));
+      qs('#retRet').textContent=`${fmt(ret)} pts`; qs('#retLoss').textContent=`${a} pts`;
+      qs('#trSubmit').textContent=`Place ${a} pts ${_selPos.toUpperCase()}`;
+    }
+    qs('#trAmt')?.addEventListener('input',updTrade); updTrade();
+    qs('#trSubmit')?.addEventListener('click',async()=>{
+      const h=getH(); if(!h){showMsg('trMsg','warn','Set your handle above.');return;}
+      const a=Number(qs('#trAmt').value);
+      qs('#trSubmit').disabled=true; qs('#trSubmit').textContent='Placing…';
+      try{
+        await apiFetch(`/stakes/${s.id}/positions`,{method:'POST',body:JSON.stringify({bettor_id:cid(h),bettor_name:h,position:_selPos,amount:a})});
+        showMsg('trMsg','ok',`${a} pts placed ${_selPos.toUpperCase()} ✓`);
+        const fr=await apiFetch(`/stakes/${s.id}`);_cur=fr;const idx=_stakes.findIndex(x=>x.id===fr.id);if(idx>=0)_stakes[idx]=fr;applyFilters();
+      }catch(e){const _te=e?.detail?.reason||e?.detail?.error||(typeof e?.detail==='string'?e?.detail:null)||'Position failed — try again.';showMsg('trMsg','err',_te);}
+      qs('#trSubmit').disabled=false; updTrade();
+    });
+  }
+  else if(tab==='resolve'&&s.status==='open'&&!isCom){
+    c.innerHTML=`<div class="fstack">${exp?'<div class="alrt alrt-warn">Deadline passed — you can still submit proof. Oracle will evaluate.</div>':'<div class="alrt alrt-info">Only the stake creator can submit proof. Enter your creator ID to verify.</div>'}<div class="field"><div class="flabel-row"><label class="flabel" for="prCid">Creator ID</label><span class="fhint">Shown when you created this stake</span></div><input type="text" id="prCid" class="inp" placeholder="user-${(s.creator_name||'').toLowerCase().replace(/\s+/g,'-')}"/></div><div class="field"><div class="flabel-row"><label class="flabel" for="prTxt">Proof description</label><span class="fhint">${s.verification_hint||''}</span></div><textarea id="prTxt" class="inp-ta" rows="4" placeholder="Describe what you did, paste a URL, commit link, calendar event…"></textarea></div><div class="field"><label class="flabel" for="prUrl">Proof URL (optional)</label><input type="url" id="prUrl" class="inp" placeholder="https://github.com/you/repo/commit/abc"/></div><div class="field"><label class="flabel">Image proof (optional)</label><div style="display:flex;gap:8px;align-items:center"><input type="file" id="imgIn" accept="image/*" style="display:none"/><button class="btn btn-ghost btn-sm" id="imgPick">📷 Attach image</button><button class="btn btn-ghost btn-sm" id="imgRm" style="display:none">Remove</button></div><div class="img-prev" id="imgPrev"><img id="imgPrevImg" alt="Proof preview"/></div></div><div id="prMsg"></div><button class="btn btn-out btn-full" id="prSubmit" style="border-color:var(--accent);color:var(--accent)">Submit to Gemini Oracle →</button></div>`;
+    _imgB64=null; _imgMime='image/jpeg';
+    qs('#imgPick')?.addEventListener('click',()=>qs('#imgIn').click());
+    qs('#imgIn')?.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;_imgMime=f.type||'image/jpeg';const r=new FileReader();r.onload=ev=>{_imgB64=ev.target.result.split(',')[1];qs('#imgPrev').style.display='block';qs('#imgPrevImg').src=ev.target.result;qs('#imgPick').textContent='✓ Image attached';qs('#imgRm').style.display='';};r.readAsDataURL(f);});
+    qs('#imgRm')?.addEventListener('click',()=>{_imgB64=null;qs('#imgPrev').style.display='none';qs('#imgPick').textContent='📷 Attach image';qs('#imgRm').style.display='none';});
+    qs('#prSubmit')?.addEventListener('click',async()=>{
+      const pid=qs('#prCid').value.trim();if(!pid){showMsg('prMsg','err','Enter your creator ID.');return;}
+      qs('#prSubmit').disabled=true;qs('#prSubmit').textContent='Consulting Oracle…';
+      try{
+        const res=await apiFetch(`/stakes/${s.id}/resolve`,{method:'POST',body:JSON.stringify({creator_id:pid,proof_text:qs('#prTxt').value||null,proof_url:qs('#prUrl').value||null,image_b64:_imgB64||null,image_mime:_imgMime})});
+        showMsg('prMsg',res.verdict==='success'?'ok':'err',`Oracle: ${res.verdict.toUpperCase()} — ${Math.round(res.confidence*100)}% confidence`);
+        const fr=await apiFetch(`/stakes/${s.id}`);_cur=fr;const idx=_stakes.findIndex(x=>x.id===fr.id);if(idx>=0)_stakes[idx]=fr;openStakeModal(fr);
+      }catch(e){const d=e?.detail;showMsg('prMsg','err',d?.reason||d||'Resolution failed.');}
+      qs('#prSubmit').disabled=false;qs('#prSubmit').textContent='Submit to Gemini Oracle →';
+    });
+  }
+  else if(tab==='resolve'&&s.status==='open'&&isCom){
+    c.innerHTML=`<div class="fstack"><div class="alrt alrt-info">Vote on whether the creator completed their goal. Auto-resolves at 5+ votes with 60%+ consensus.</div>${cvV.length?`<div class="cv-tally"><div class="cv-tally-label">Tally — ${cvV.length}/5 votes</div>${oddsRowHTML(cvV.length?Math.round(cvSuc/cvV.length*100):50,cvV.length?Math.round((cvV.length-cvSuc)/cvV.length*100):50)}<div style="margin-top:10px">${cvV.map(v=>`<div class="cv-voter"><span>${v.voter_name}</span><span class="cv-voter-vote ${v.vote==='success'?'s':'f'}">${v.vote.toUpperCase()}</span></div>`).join('')}</div></div>`:''}<div id="cvMsg"></div><div class="btn-grid2"><button class="btn btn-yes" id="cvYes" ${!getH()?'disabled':''}>✓ Vote SUCCESS</button><button class="btn btn-no" id="cvNo" ${!getH()?'disabled':''}>✗ Vote FAILURE</button></div></div>`;
+    const vote=async v=>{
+      const h=getH();if(!h){showMsg('cvMsg','warn','Set your handle above.');return;}
+      qsa('#cvYes,#cvNo').forEach(b=>b.disabled=true);
+      try{const res=await apiFetch(`/stakes/${s.id}/community-vote`,{method:'POST',body:JSON.stringify({voter_id:cid(h),voter_name:h,vote:v})});showMsg('cvMsg','ok',res.auto_resolved?`Resolved: ${res.auto_resolved.toUpperCase()}`:`Vote cast — ${res.success}/${res.votes} say success`);const fr=await apiFetch(`/stakes/${s.id}`);_cur=fr;openStakeModal(fr);}
+      catch(e){const _ce=e?.detail?.reason||(typeof e?.detail==='string'?e?.detail:null)||'Vote failed.';showMsg('cvMsg','err',_ce);}
+      qsa('#cvYes,#cvNo').forEach(b=>b.disabled=false);
+    };
+    qs('#cvYes')?.addEventListener('click',()=>vote('success'));
+    qs('#cvNo')?.addEventListener('click',()=>vote('failure'));
+  }
+  else if(tab==='payouts'){
+    const pay=s.payouts||[];if(!pay.length){c.innerHTML='<p style="color:var(--ink3)">No settlement data.</p>';return;}
+    c.innerHTML=`<div class="st-h"><span>Name</span><span style="text-align:center">Side</span><span style="text-align:right">Wagered</span><span style="text-align:right">P&L</span></div>${pay.map(p=>`<div class="st-r"><div style="display:flex;align-items:center;gap:6px"><span>${p.bettor_name}</span>${p.is_creator?'<span class="tag tc-career" style="font-size:.55rem">CREATOR</span>':''}</div><span class="ob-side ${p.position==='yes'?'y':'n'}" style="text-align:center">${p.position.toUpperCase()}</span><span class="ob-pts">${fmt(p.wagered)}</span><span class="st-pnl ${p.profit>0?'pos':'neg'}">${p.profit>0?'+':''}${fmt(p.profit)}</span></div>`).join('')}`;
+  }
+}
+
+// MODAL CLOSE
+function closeStakeModal(){
+  const ov=qs('#stakeOverlay');
+  ov.classList.remove('visible');
+  setTimeout(()=>{ov.classList.remove('open');_cur=null;},220);
+}
+qs('#mhClose').addEventListener('click',closeStakeModal);
+qs('#stakeOverlay').addEventListener('click',e=>{if(e.target===qs('#stakeOverlay'))closeStakeModal();});
+
+// CREATE
+function openCreate(){
+  qs('#crHandle').value=getH(); updateCidChip();
+  const co=qs('#createOverlay');
+  co.classList.add('open');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>co.classList.add('visible')));
+  setTimeout(()=>qs('#crHandle')?.focus(),50);
+}
+qs('#crHours').addEventListener('input',e=>{qs('#crHrVal').textContent=`${e.target.value}h from now`;});
+qs('#crAmt').addEventListener('input',e=>{qs('#crAmtVal').textContent=`${e.target.value} pts`;});
+qs('#crSubmit').addEventListener('click',async()=>{
+  const h=qs('#crHandle').value.trim(),t=qs('#crTitle').value.trim(),d=qs('#crDesc').value.trim();
+  if(!h||!t||!d){showMsg('crMsg','err','Handle, title and description are required.');return;}
+  qs('#crSubmit').disabled=true;qs('#crSubmit').textContent='Running Guardian check…';
+  try{
+    const hrs=Number(qs('#crHours').value);
+    await apiFetch('/stakes',{method:'POST',body:JSON.stringify({creator_id:cid(h),creator_name:h,title:t,description:d,deadline:new Date(Date.now()+hrs*36e5).toISOString(),stake_amount:Number(qs('#crAmt').value),verification_method:qs('#crMethod').value,verification_hint:qs('#crHint').value||null})});
+    showMsg('crMsg','ok','Stake listed successfully!');
+    setTimeout(()=>{qs('#createOverlay').classList.remove('open');loadAll();},1200);
+  }catch(e){const d2=e?.detail;const _em=d2?.reason||d2?.error||(typeof d2==='string'?d2:null)||'Creation failed — check API key in .env';showMsg('crMsg','err',_em);}
+  qs('#crSubmit').disabled=false;qs('#crSubmit').textContent='List on exchange →';
+});
+function closeCreate(){const co=qs('#createOverlay');co.classList.remove('visible');setTimeout(()=>co.classList.remove('open'),220);}
+qs('#crClose').addEventListener('click',closeCreate);
+qs('#createOverlay').addEventListener('click',e=>{if(e.target===qs('#createOverlay'))closeCreate();});
+
+// HISTORY
+async function openHist(uid,uname){
+  qs('#hpName').textContent=uname;
+  qs('#hpStats').innerHTML='<div style="color:var(--ink3);font-size:.8125rem;padding:4px 0">Loading…</div>';
+  qs('#hpTl').innerHTML=''; qs('#hpChart').innerHTML='';
+  const ho=qs('#hpOverlay');
+  ho.classList.add('open');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>ho.classList.add('visible')));
+  try{
+    const d=await apiFetch(`/users/${uid}/history`);
+    const p=d.success_rate!=null?Math.round(d.success_rate*100):null;
+    const sc=p>=65?'var(--yes)':p>=45?'var(--live)':'var(--no)';
+    const stc=d.streak_type==='success'?'var(--yes)':'var(--no)';
+    qs('#hpStats').innerHTML=`<div class="hp-stat"><div class="hp-stat-val">${d.total_stakes||0}</div><div class="hp-stat-label">Total</div></div><div class="hp-stat"><div class="hp-stat-val" style="color:${sc}">${p!=null?p+'%':'—'}</div><div class="hp-stat-label">Win rate</div></div><div class="hp-stat"><div class="hp-stat-val" style="color:${stc}">${d.current_streak||0}</div><div class="hp-stat-label">Streak</div></div>`;
+    if(d.timeline&&d.timeline.length>=2){
+      const rv=d.timeline.slice().reverse();let wins=0;
+      const sn=rv.map((s,i)=>{wins+=(s.verdict==='success'?1:0);return{ts:s.resolved_at||new Date(Date.now()-(rv.length-i)*86400000).toISOString(),yes_pct:Math.round(wins/(i+1)*100)};});
+      const cd=document.createElement('div');cd.style.cssText='background:var(--cream);padding:12px;margin-bottom:12px';
+      cd.innerHTML='<div style="font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--fog);margin-bottom:8px">Success rate over time</div>';
+      const cw=document.createElement('div');cd.appendChild(cw);qs('#hpChart').appendChild(cd);
+      setTimeout(()=>buildChart(sn,cw),0);
+    }
+    if(!d.timeline?.length){qs('#hpTl').innerHTML='<p style="font-size:.8125rem;color:var(--ink3);text-align:center;padding:1rem">No resolved stakes yet.</p>';return;}
+    qs('#hpTl').innerHTML=`<div style="font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--fog);margin-bottom:8px">Recent stakes</div>${d.timeline.slice(0,8).map(s=>`<div class="hp-entry"><span class="hp-entry-icon ${s.verdict==='success'?'s':'f'}">${s.verdict==='success'?'✓':'✗'}</span><span class="hp-entry-title">${s.title}</span><span class="tag ${DIFFCLS[s.difficulty]||'td-medium'}" style="font-size:.575rem">${s.difficulty}</span></div>`).join('')}`;
+  }catch{qs('#hpStats').innerHTML='<p style="color:var(--no);font-size:.8125rem">Could not load history.</p>';}
+}
+function closeHist(){const ho=qs('#hpOverlay');ho.classList.remove('visible');setTimeout(()=>ho.classList.remove('open'),200);}
+qs('#hpClose').addEventListener('click',closeHist);
+qs('#hpOverlay').addEventListener('click',e=>{if(e.target===qs('#hpOverlay'))closeHist();});
+
+// ESC
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if(qs('#stakeOverlay').classList.contains('open'))closeStakeModal();
+  else if(qs('#createOverlay').classList.contains('open'))closeCreate();
+  else if(qs('#hpOverlay').classList.contains('open'))closeHist();
+});
+
+// INIT
+checkH(); loadAll();
+setInterval(loadAll,30000);
+</script>
+</body>
+</html>
