@@ -114,3 +114,15 @@ StakePad's interface is crafted with a high-fidelity **newspaper editorial style
    npm run dev
    ```
 4. Access the web interface at `http://localhost:3000`.
+
+## A note on the stack
+
+StakePad was originally architected as a Python/FastAPI backend — a five-agent 
+system (moderation, scoring, verification, narrative, coaching) using the Gemini 
+API for multimodal proof verification (text, GitHub links, images).
+
+For submission/deployment, the project went through Google AI Studio's publishing 
+pipeline, which required a TypeScript/Node/Vite structure to deploy on Cloud Run. 
+The live deployment reflects that conversion — the original agent architecture 
+and logic were preserved, but the implementation language changed for hosting 
+compatibility.
